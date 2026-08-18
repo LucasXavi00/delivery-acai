@@ -1,15 +1,19 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
-const path = require('path');
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function conectarBanco() {
-    const db = await open({
-        filename: path.join(__dirname, 'açaizada.db'),
-        driver: sqlite3.Database
-    });
+  const db = await open({
+    filename: path.join(__dirname, 'açaizada.db'),
+    driver: sqlite3.Database
+  });
 
-    // Criação das tabelas
-    await db.exec(`
+  // Criação das tabelas
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             cliente TEXT NOT NULL,
@@ -31,7 +35,7 @@ async function conectarBanco() {
         );
     `);
 
-    return db;
+  return db;
 }
 
-module.exports = conectarBanco;
+export default conectarBanco;

@@ -1,283 +1,540 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Açaizada 🍇 - Cardápio</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #160a22; color: #fff; padding: 20px; display: flex; justify-content: center; }
-        
-        .container { width: 100%; max-width: 520px; background: #1f112e; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); padding-bottom: 90px; }
-        
-        header { text-align: center; margin-bottom: 16px; }
-        header h1 { color: #fff; font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; }
-        header p { color: #bca8d0; font-size: 0.9rem; margin-top: 4px; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      body {
+        background-color: #160a22;
+        color: #fff;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+      }
 
-        /* Banner Amarelo */
-        .banner-promocao { background: #ffd700; color: #160a22; font-weight: bold; text-align: center; padding: 10px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 24px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+      .container {
+        width: 100%;
+        max-width: 520px;
+        background: #1f112e;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        padding-bottom: 90px;
+      }
 
-        .titulo-secao { color: #fff; font-size: 1.1rem; font-weight: bold; margin-bottom: 16px; text-transform: uppercase; border-left: 4px solid #9c27b0; padding-left: 8px; }
+      header {
+        text-align: center;
+        margin-bottom: 16px;
+      }
+      header h1 {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+      header p {
+        color: #bca8d0;
+        font-size: 0.9rem;
+        margin-top: 4px;
+      }
 
-        /* Lista de Tamanhos */
-        .lista-tamanhos { display: flex; flex-direction: column; gap: 14px; }
-        
-        .card-tamanho { background: #28163c; border: 1px solid #3c2258; border-radius: 14px; padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        .card-tamanho:hover { border-color: #9c27b0; }
+      /* Banner Amarelo */
+      .banner-promocao {
+        background: #ffd700;
+        color: #160a22;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      }
 
-        .info-tamanho h3 { font-size: 1.1rem; color: #fff; margin-bottom: 4px; }
-        .info-tamanho p { font-size: 0.85rem; color: #a491b8; margin-bottom: 8px; }
-        .info-tamanho .preco { font-size: 1.1rem; font-weight: bold; color: #00e676; }
+      .titulo-secao {
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        border-left: 4px solid #9c27b0;
+        padding-left: 8px;
+      }
 
-        .btn-monte { background: #ab47bc; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
-        .btn-monte:hover { background: #8e24aa; }
+      /* Lista de Tamanhos */
+      .lista-tamanhos {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
 
-        /* Barra Inferior do Carrinho */
-        .barra-carrinho { position: fixed; bottom: 0; left: 0; right: 0; background: #160a22; border-top: 1px solid #3c2258; padding: 12px 20px; display: flex; justify-content: center; z-index: 10; }
-        .carrinho-conteudo { width: 100%; max-width: 520px; display: flex; justify-content: space-between; align-items: center; }
-        .carrinho-total span { font-size: 0.8rem; color: #a491b8; display: block; }
-        .carrinho-total strong { font-size: 1.2rem; color: #00e676; }
-        .btn-carrinho { background: #00e676; color: #160a22; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; }
+      .card-tamanho {
+        background: #28163c;
+        border: 1px solid #3c2258;
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.2s;
+      }
+      .card-tamanho:hover {
+        border-color: #9c27b0;
+      }
 
-        /* Modal Customizacao */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-        .modal-conteudo { background: #1f112e; border: 1px solid #3c2258; border-radius: 16px; padding: 20px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; color: #fff; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c2258; padding-bottom: 10px; margin-bottom: 16px; }
-        .btn-fechar { background: none; border: none; color: #a491b8; font-size: 1.5rem; cursor: pointer; }
+      .info-tamanho h3 {
+        font-size: 1.1rem;
+        color: #fff;
+        margin-bottom: 4px;
+      }
+      .info-tamanho p {
+        font-size: 0.85rem;
+        color: #a491b8;
+        margin-bottom: 8px;
+      }
+      .info-tamanho .preco {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #00e676;
+      }
 
-        .opcao-grupo { margin-bottom: 16px; }
-        .opcao-grupo h4 { color: #ffd700; font-size: 0.95rem; margin-bottom: 8px; }
-        .grid-modal { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        
-        .item-selecionavel { background: #28163c; border: 1px solid #3c2258; border-radius: 8px; padding: 10px; font-size: 0.85rem; text-align: center; cursor: pointer; }
-        .item-selecionavel.selecionado { background: #8e24aa; border-color: #ffd700; font-weight: bold; }
+      .btn-monte {
+        background: #ab47bc;
+        color: #fff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn-monte:hover {
+        background: #8e24aa;
+      }
 
-        .campo-input { width: 100%; padding: 10px; background: #28163c; border: 1px solid #3c2258; border-radius: 8px; color: #fff; margin-bottom: 10px; outline: none; }
-        button.btn-adicionar { width: 100%; background: #00e676; color: #160a22; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+      /* Barra Inferior do Carrinho */
+      .barra-carrinho {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #160a22;
+        border-top: 1px solid #3c2258;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: center;
+        z-index: 10;
+      }
+      .carrinho-conteudo {
+        width: 100%;
+        max-width: 520px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .carrinho-total span {
+        font-size: 0.8rem;
+        color: #a491b8;
+        display: block;
+      }
+      .carrinho-total strong {
+        font-size: 1.2rem;
+        color: #00e676;
+      }
+      .btn-carrinho {
+        background: #00e676;
+        color: #160a22;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 0.95rem;
+        cursor: pointer;
+      }
+
+      /* Modal Customizacao */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+      .modal-conteudo {
+        background: #1f112e;
+        border: 1px solid #3c2258;
+        border-radius: 16px;
+        padding: 20px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        color: #fff;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #3c2258;
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+      }
+      .btn-fechar {
+        background: none;
+        border: none;
+        color: #a491b8;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .opcao-grupo {
+        margin-bottom: 16px;
+      }
+      .opcao-grupo h4 {
+        color: #ffd700;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+      }
+      .grid-modal {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .item-selecionavel {
+        background: #28163c;
+        border: 1px solid #3c2258;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 0.85rem;
+        text-align: center;
+        cursor: pointer;
+      }
+      .item-selecionavel.selecionado {
+        background: #8e24aa;
+        border-color: #ffd700;
+        font-weight: bold;
+      }
+
+      .campo-input {
+        width: 100%;
+        padding: 10px;
+        background: #28163c;
+        border: 1px solid #3c2258;
+        border-radius: 8px;
+        color: #fff;
+        margin-bottom: 10px;
+        outline: none;
+      }
+      button.btn-adicionar {
+        width: 100%;
+        background: #00e676;
+        color: #160a22;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 10px;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container">
-        <header>
-            <h1>AÇAÍZADA</h1>
-            <p>Sabor que vicia, qualidade que conquista! 🍇</p>
-        </header>
+      <header>
+        <h1>AÇAÍZADA</h1>
+        <p>Sabor que vicia, qualidade que conquista! 🍇</p>
+      </header>
 
-        <div class="banner-promocao">
-            🎁 NUTELLA GRÁTIS PARA OS 20 PRIMEIROS PEDIDOS!
+      <div class="banner-promocao">🎁 NUTELLA GRÁTIS PARA OS 20 PRIMEIROS PEDIDOS!</div>
+
+      <div class="titulo-secao">Escolha o Tamanho</div>
+
+      <div class="lista-tamanhos">
+        <div class="card-tamanho">
+          <div class="info-tamanho">
+            <h3>Açaí 400 ml</h3>
+            <p>Ideal para matar a vontade!</p>
+            <div class="preco">R$ 8,00</div>
+          </div>
+          <button class="btn-monte" onclick="abrirModal('400 ml', 8.0)">Monte o Seu</button>
         </div>
 
-        <div class="titulo-secao">Escolha o Tamanho</div>
-
-        <div class="lista-tamanhos">
-            <div class="card-tamanho">
-                <div class="info-tamanho">
-                    <h3>Açaí 400 ml</h3>
-                    <p>Ideal para matar a vontade!</p>
-                    <div class="preco">R$ 8,00</div>
-                </div>
-                <button class="btn-monte" onclick="abrirModal('400 ml', 8.00)">Monte o Seu</button>
-            </div>
-
-            <div class="card-tamanho">
-                <div class="info-tamanho">
-                    <h3>Açaí 500 ml</h3>
-                    <p>Mais sabor, mais felicidade!</p>
-                    <div class="preco">R$ 10,00</div>
-                </div>
-                <button class="btn-monte" onclick="abrirModal('500 ml', 10.00)">Monte o Seu</button>
-            </div>
-
-            <div class="card-tamanho">
-                <div class="info-tamanho">
-                    <h3>Açaí 700 ml</h3>
-                    <p>Para quem não abre mão!</p>
-                    <div class="preco">R$ 13,00</div>
-                </div>
-                <button class="btn-monte" onclick="abrirModal('700 ml', 13.00)">Monte o Seu</button>
-            </div>
-
-            <div class="card-tamanho">
-                <div class="info-tamanho">
-                    <h3>Açaí 1 LITRO</h3>
-                    <p>Compartilhe bons momentos!</p>
-                    <div class="preco">R$ 26,00</div>
-                </div>
-                <button class="btn-monte" onclick="abrirModal('1 LITRO', 26.00)">Monte o Seu</button>
-            </div>
+        <div class="card-tamanho">
+          <div class="info-tamanho">
+            <h3>Açaí 500 ml</h3>
+            <p>Mais sabor, mais felicidade!</p>
+            <div class="preco">R$ 10,00</div>
+          </div>
+          <button class="btn-monte" onclick="abrirModal('500 ml', 10.0)">Monte o Seu</button>
         </div>
+
+        <div class="card-tamanho">
+          <div class="info-tamanho">
+            <h3>Açaí 700 ml</h3>
+            <p>Para quem não abre mão!</p>
+            <div class="preco">R$ 13,00</div>
+          </div>
+          <button class="btn-monte" onclick="abrirModal('700 ml', 13.0)">Monte o Seu</button>
+        </div>
+
+        <div class="card-tamanho">
+          <div class="info-tamanho">
+            <h3>Açaí 1 LITRO</h3>
+            <p>Compartilhe bons momentos!</p>
+            <div class="preco">R$ 26,00</div>
+          </div>
+          <button class="btn-monte" onclick="abrirModal('1 LITRO', 26.0)">Monte o Seu</button>
+        </div>
+      </div>
     </div>
 
     <!-- Barra Fixa do Carrinho -->
     <div class="barra-carrinho">
-        <div class="carrinho-conteudo">
-            <div class="carrinho-total">
-                <span>Total do Pedido:</span>
-                <strong id="total-barra">R$ 0,00</strong>
-            </div>
-            <button class="btn-carrinho" id="btn-ver-carrinho" onclick="finalizarPedido()">Ver Carrinho (0)</button>
+      <div class="carrinho-conteudo">
+        <div class="carrinho-total">
+          <span>Total do Pedido:</span>
+          <strong id="total-barra">R$ 0,00</strong>
         </div>
+        <button class="btn-carrinho" id="btn-ver-carrinho" onclick="finalizarPedido()">
+          Ver Carrinho (0)
+        </button>
+      </div>
     </div>
 
     <!-- Modal de Customização -->
     <div class="modal" id="modal-montar">
-        <div class="modal-conteudo">
-            <div class="modal-header">
-                <h3 id="modal-titulo">Montar Açaí</h3>
-                <button class="btn-fechar" onclick="fecharModal()">&times;</button>
-            </div>
-
-            <div class="opcao-grupo">
-                <h4>1. Base do Açaí</h4>
-                <div class="grid-modal">
-                    <div class="item-selecionavel" onclick="selecionarBase('Natural', this)">Natural 🌿</div>
-                    <div class="item-selecionavel" onclick="selecionarBase('De Banana', this)">De Banana 🍌</div>
-                </div>
-            </div>
-
-            <div class="opcao-grupo">
-                <h4>2. Cobertura</h4>
-                <div class="grid-modal">
-                    <div class="item-selecionavel" onclick="selecionarCobertura('Chocolate', this)">Chocolate</div>
-                    <div class="item-selecionavel" onclick="selecionarCobertura('Morango', this)">Morango</div>
-                    <div class="item-selecionavel" onclick="selecionarCobertura('Caramelo', this)">Caramelo</div>
-                    <div class="item-selecionavel" onclick="selecionarCobertura('Sem Cobertura', this)">Sem Cobertura</div>
-                </div>
-            </div>
-
-            <div class="opcao-grupo">
-                <h4>3. Acompanhamentos</h4>
-                <div class="grid-modal">
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Sucrilhos', this)">Sucrilhos</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Leite em Pó', this)">Leite em Pó</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Leite Condensado', this)">Leite Condensado</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Jujuba', this)">Jujuba</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Chocoboll', this)">Chocoboll</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Gran. Chocolate', this)">Gran. Chocolate</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Gran. Colorido', this)">Gran. Colorido</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Paçoca', this)">Paçoca</div>
-                    <div class="item-selecionavel" onclick="alternarAcompanhamento('Granola', this)">Granola</div>
-                </div>
-            </div>
-
-            <div class="opcao-grupo">
-                <h4>4. Dados para Entrega</h4>
-                <input type="text" id="cliente-nome" class="campo-input" placeholder="Seu Nome">
-                <input type="text" id="cliente-endereco" class="campo-input" placeholder="Endereço Completo">
-                <select id="cliente-pagamento" class="campo-input">
-                    <option value="Pix">Forma de Pagamento: Pix</option>
-                    <option value="Cartão">Forma de Pagamento: Cartão</option>
-                    <option value="Dinheiro">Forma de Pagamento: Dinheiro</option>
-                </select>
-            </div>
-
-            <button class="btn-adicionar" onclick="confirmarItem()">Confirmar e Adicionar</button>
+      <div class="modal-conteudo">
+        <div class="modal-header">
+          <h3 id="modal-titulo">Montar Açaí</h3>
+          <button class="btn-fechar" onclick="fecharModal()">&times;</button>
         </div>
+
+        <div class="opcao-grupo">
+          <h4>1. Base do Açaí</h4>
+          <div class="grid-modal">
+            <div class="item-selecionavel" onclick="selecionarBase('Natural', this)">
+              Natural 🌿
+            </div>
+            <div class="item-selecionavel" onclick="selecionarBase('De Banana', this)">
+              De Banana 🍌
+            </div>
+          </div>
+        </div>
+
+        <div class="opcao-grupo">
+          <h4>2. Cobertura</h4>
+          <div class="grid-modal">
+            <div class="item-selecionavel" onclick="selecionarCobertura('Chocolate', this)">
+              Chocolate
+            </div>
+            <div class="item-selecionavel" onclick="selecionarCobertura('Morango', this)">
+              Morango
+            </div>
+            <div class="item-selecionavel" onclick="selecionarCobertura('Caramelo', this)">
+              Caramelo
+            </div>
+            <div class="item-selecionavel" onclick="selecionarCobertura('Sem Cobertura', this)">
+              Sem Cobertura
+            </div>
+          </div>
+        </div>
+
+        <div class="opcao-grupo">
+          <h4>3. Acompanhamentos</h4>
+          <div class="grid-modal">
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Sucrilhos', this)">
+              Sucrilhos
+            </div>
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Leite em Pó', this)">
+              Leite em Pó
+            </div>
+            <div
+              class="item-selecionavel"
+              onclick="alternarAcompanhamento('Leite Condensado', this)"
+            >
+              Leite Condensado
+            </div>
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Jujuba', this)">
+              Jujuba
+            </div>
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Chocoboll', this)">
+              Chocoboll
+            </div>
+            <div
+              class="item-selecionavel"
+              onclick="alternarAcompanhamento('Gran. Chocolate', this)"
+            >
+              Gran. Chocolate
+            </div>
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Gran. Colorido', this)">
+              Gran. Colorido
+            </div>
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Paçoca', this)">
+              Paçoca
+            </div>
+            <div class="item-selecionavel" onclick="alternarAcompanhamento('Granola', this)">
+              Granola
+            </div>
+          </div>
+        </div>
+
+        <div class="opcao-grupo">
+          <h4>4. Dados para Entrega</h4>
+          <input type="text" id="cliente-nome" class="campo-input" placeholder="Seu Nome" />
+          <input
+            type="text"
+            id="cliente-endereco"
+            class="campo-input"
+            placeholder="Endereço Completo"
+          />
+          <select id="cliente-pagamento" class="campo-input">
+            <option value="Pix">Forma de Pagamento: Pix</option>
+            <option value="Cartão">Forma de Pagamento: Cartão</option>
+            <option value="Dinheiro">Forma de Pagamento: Dinheiro</option>
+          </select>
+        </div>
+
+        <button class="btn-adicionar" onclick="confirmarItem()">Confirmar e Adicionar</button>
+      </div>
     </div>
 
     <script>
-        let carrinho = [];
-        let itemEmEdicao = null;
-        const NUMERO_WHATSAPP = "5521999998888";
+      let carrinho = [];
+      let itemEmEdicao = null;
+      const NUMERO_WHATSAPP = '5521999998888';
 
-        function abrirModal(tamanho, preco) {
-            itemEmEdicao = {
-                tamanho: tamanho,
-                preco: preco,
-                base: null,
-                cobertura: null,
-                acompanhamentos: []
-            };
+      function abrirModal(tamanho, preco) {
+        itemEmEdicao = {
+          tamanho: tamanho,
+          preco: preco,
+          base: null,
+          cobertura: null,
+          acompanhamentos: []
+        };
 
-            document.getElementById('modal-titulo').innerText = `Montar Açaí ${tamanho}`;
-            document.querySelectorAll('.item-selecionavel').forEach(el => el.classList.remove('selecionado'));
-            document.getElementById('modal-montar').style.display = 'flex';
+        document.getElementById('modal-titulo').innerText = `Montar Açaí ${tamanho}`;
+        document
+          .querySelectorAll('.item-selecionavel')
+          .forEach(el => el.classList.remove('selecionado'));
+        document.getElementById('modal-montar').style.display = 'flex';
+      }
+
+      function fecharModal() {
+        document.getElementById('modal-montar').style.display = 'none';
+      }
+
+      function selecionarBase(base, el) {
+        el.parentElement
+          .querySelectorAll('.item-selecionavel')
+          .forEach(i => i.classList.remove('selecionado'));
+        el.classList.add('selecionado');
+        itemEmEdicao.base = base;
+      }
+
+      function selecionarCobertura(cobertura, el) {
+        el.parentElement
+          .querySelectorAll('.item-selecionavel')
+          .forEach(i => i.classList.remove('selecionado'));
+        el.classList.add('selecionado');
+        itemEmEdicao.cobertura = cobertura;
+      }
+
+      function alternarAcompanhamento(nome, el) {
+        el.classList.toggle('selecionado');
+        if (itemEmEdicao.acompanhamentos.includes(nome)) {
+          itemEmEdicao.acompanhamentos = itemEmEdicao.acompanhamentos.filter(i => i !== nome);
+        } else {
+          itemEmEdicao.acompanhamentos.push(nome);
+        }
+      }
+
+      function confirmarItem() {
+        if (!itemEmEdicao.base) {
+          alert('Escolha a base do açaí!');
+          return;
+        }
+        if (!itemEmEdicao.cobertura) {
+          alert('Escolha a cobertura!');
+          return;
         }
 
-        function fecharModal() {
-            document.getElementById('modal-montar').style.display = 'none';
+        carrinho.push({ ...itemEmEdicao });
+        atualizarCarrinhoBarra();
+        fecharModal();
+      }
+
+      function atualizarCarrinhoBarra() {
+        const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
+        document.getElementById('total-barra').innerText =
+          `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById('btn-ver-carrinho').innerText = `Ver Carrinho (${carrinho.length})`;
+      }
+
+      async function finalizarPedido() {
+        if (carrinho.length === 0) {
+          alert('Seu carrinho está vazio! Escolha um açaí primeiro.');
+          return;
         }
 
-        function selecionarBase(base, el) {
-            el.parentElement.querySelectorAll('.item-selecionavel').forEach(i => i.classList.remove('selecionado'));
-            el.classList.add('selecionado');
-            itemEmEdicao.base = base;
+        const nome = document.getElementById('cliente-nome').value.trim();
+        const endereco = document.getElementById('cliente-endereco').value.trim();
+        const pagamento = document.getElementById('cliente-pagamento').value;
+
+        if (!nome || !endereco) {
+          alert('Preencha seu nome e endereço no menu de montagem!');
+          return;
         }
 
-        function selecionarCobertura(cobertura, el) {
-            el.parentElement.querySelectorAll('.item-selecionavel').forEach(i => i.classList.remove('selecionado'));
-            el.classList.add('selecionado');
-            itemEmEdicao.cobertura = cobertura;
+        const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
+
+        const dadosPedido = {
+          cliente: nome,
+          endereco: endereco,
+          pagamento: pagamento,
+          total: total,
+          itens: carrinho.map(c => ({
+            produto: `Açaí ${c.tamanho}`,
+            base: c.base,
+            complementos: [`Cobertura: ${c.cobertura}`, ...c.acompanhamentos],
+            valor: c.preco
+          }))
+        };
+
+        try {
+          await fetch('http://localhost:3000/api/pedidos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dadosPedido)
+          });
+
+          let textoItens = '';
+          carrinho.forEach((c, idx) => {
+            textoItens += `\n*${idx + 1}. Açaí ${c.tamanho} (${c.base})*\n- Cobertura: ${c.cobertura}\n- Acomp: ${c.acompanhamentos.join(', ') || 'Nenhum'}\n`;
+          });
+
+          const msg = `🍇 *NOVO PEDIDO - AÇAÍZADA*\n${textoItens}\n*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n👤 *Cliente:* ${nome}\n📍 *Endereço:* ${endereco}\n💳 *Pagamento:* ${pagamento}`;
+
+          window.open(`https://wa.me/${5521972692093}?text=${encodeURIComponent(msg)}`, '_blank');
+        } catch (err) {
+          alert('Erro ao processar pedido no servidor.');
         }
-
-        function alternarAcompanhamento(nome, el) {
-            el.classList.toggle('selecionado');
-            if (itemEmEdicao.acompanhamentos.includes(nome)) {
-                itemEmEdicao.acompanhamentos = itemEmEdicao.acompanhamentos.filter(i => i !== nome);
-            } else {
-                itemEmEdicao.acompanhamentos.push(nome);
-            }
-        }
-
-        function confirmarItem() {
-            if (!itemEmEdicao.base) { alert('Escolha a base do açaí!'); return; }
-            if (!itemEmEdicao.cobertura) { alert('Escolha a cobertura!'); return; }
-
-            carrinho.push({ ...itemEmEdicao });
-            atualizarCarrinhoBarra();
-            fecharModal();
-        }
-
-        function atualizarCarrinhoBarra() {
-            const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
-            document.getElementById('total-barra').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            document.getElementById('btn-ver-carrinho').innerText = `Ver Carrinho (${carrinho.length})`;
-        }
-
-        async function finalizarPedido() {
-            if (carrinho.length === 0) { alert('Seu carrinho está vazio! Escolha um açaí primeiro.'); return; }
-
-            const nome = document.getElementById('cliente-nome').value.trim();
-            const endereco = document.getElementById('cliente-endereco').value.trim();
-            const pagamento = document.getElementById('cliente-pagamento').value;
-
-            if (!nome || !endereco) { alert('Preencha seu nome e endereço no menu de montagem!'); return; }
-
-            const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
-
-            const dadosPedido = {
-                cliente: nome,
-                endereco: endereco,
-                pagamento: pagamento,
-                total: total,
-                itens: carrinho.map(c => ({
-                    produto: `Açaí ${c.tamanho}`,
-                    base: c.base,
-                    complementos: [`Cobertura: ${c.cobertura}`, ...c.acompanhamentos],
-                    valor: c.preco
-                }))
-            };
-
-            try {
-                await fetch('http://localhost:3000/api/pedidos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dadosPedido)
-                });
-
-                let textoItens = '';
-                carrinho.forEach((c, idx) => {
-                    textoItens += `\n*${idx + 1}. Açaí ${c.tamanho} (${c.base})*\n- Cobertura: ${c.cobertura}\n- Acomp: ${c.acompanhamentos.join(', ') || 'Nenhum'}\n`;
-                });
-
-                const msg = `🍇 *NOVO PEDIDO - AÇAÍZADA*\n${textoItens}\n*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n👤 *Cliente:* ${nome}\n📍 *Endereço:* ${endereco}\n💳 *Pagamento:* ${pagamento}`;
-
-                window.open(`https://wa.me/${5521972692093}?text=${encodeURIComponent(msg)}`, '_blank');
-            } catch (err) {
-                alert('Erro ao processar pedido no servidor.');
-            }
-        }
+      }
     </script>
-</body>
+  </body>
 </html>

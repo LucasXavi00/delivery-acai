@@ -1,121 +1,101 @@
-const express = require('express');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const conectarBanco = require('../database/db');
+// ========================================
+// SERVIDOR PRINCIPAL - NOVA ARQUITETURA
+// ========================================
+
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import logger from './config/logger.js';
+import { config, validateConfig } from './config/app.config.js';
+import { initializeDatabase, closeDatabase } from './config/database.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import authRoutes from './routes/auth.js';
+import pedidosRoutes from './routes/pedidos.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const SECRET_KEY = 'sua_chave_secreta_açaizada_2026'; // Mude em produção
 
-app.use(cors());
-app.use(express.json());
-
-let db;
-
-conectarBanco().then(database => {
-    db = database;
-    console.log('🗄️  Banco de dados SQLite conectado com sucesso!');
-}).catch(err => {
-    console.error('Erro ao conectar ao banco de dados:', err);
-});
-
-// Middleware para verificar se o usuário está autenticado
-function autenticarToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        return res.status(401).json({ erro: 'Acesso negado. Token não fornecido.' });
-    }
-
-    jwt.verify(token, SECRET_KEY, (err, usuario) => {
-        if (err) return res.status(403).json({ erro: 'Token inválido ou expirado.' });
-        req.usuario = usuario;
-        next();
-    });
+// ========================================
+// 1. VALIDAÇÕES INICIAIS
+// ========================================
+try {
+  validateConfig();
+  logger.info('✅ Configurações validadas com sucesso');
+} catch (error) {
+  logger.error('Erro de configuração', { erro: error.message });
+  process.exit(1);
 }
 
-// ROTA DE LOGIN (Defina aqui a senha do admin)
-app.post('/api/login', (req, res) => {
-    const { senha } = req.body;
-    const SENHA_MESTRE = 'acai123'; // Define a senha do painel da cozinha
+// ========================================
+// 2. MIDDLEWARE GLOBAL
+// ========================================
+app.use(cors(config.cors));
+app.use(express.json());
 
-    if (senha === SENHA_MESTRE) {
-        // Gera o token válido por 12 horas
-        const token = jwt.sign({ role: 'admin' }, SECRET_KEY, { expiresIn: '12h' });
-        return res.json({ token });
-    }
-
-    return res.status(401).json({ erro: 'Senha incorreta!' });
+// Log de requisições
+app.use((req, res, next) => {
+  logger.debug(`${req.method} ${req.path}`);
+  next();
 });
 
-// ROTA PÚBLICA: Criar novo pedido (Cliente)
-app.post('/api/pedidos', async (req, res) => {
-    try {
-        const { cliente, endereco, pagamento, itens, total } = req.body;
+// ========================================
+// 3. ROTAS DA API
+// ========================================
+app.use('/api/auth', authRoutes);
+app.use('/api/pedidos', pedidosRoutes);
 
-        const resultado = await db.run(
-            `INSERT INTO pedidos (cliente, endereco, pagamento, total, status) VALUES (?, ?, ?, ?, ?)`,
-            [cliente, endereco, pagamento, total, 'pendente']
-        );
-
-        const pedidoId = resultado.lastID;
-
-        for (const item of itens) {
-            const complementosTexto = item.complementos.length > 0 ? item.complementos.join(', ') : 'Nenhum';
-            await db.run(
-                `INSERT INTO itens_pedido (pedido_id, produto, base, complementos, valor) VALUES (?, ?, ?, ?, ?)`,
-                [pedidoId, item.produto, item.base, complementosTexto, item.valor]
-            );
-        }
-
-        console.log(`📦 NOVO PEDIDO #${pedidoId} GRAVADO NO BANCO!`);
-        return res.status(201).json({ mensagem: 'Pedido cadastrado com sucesso!', id: pedidoId });
-    } catch (error) {
-        console.error('Erro ao salvar pedido:', error);
-        return res.status(500).json({ erro: 'Erro ao processar pedido' });
-    }
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: config.nodeEnv
+  });
 });
 
-// ROTAS PROTEGIDAS (Apenas com token válido)
+// ========================================
+// 4. TRATAMENTO DE ERROS
+// ========================================
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-// Listar todos os pedidos
-app.get('/api/pedidos', autenticarToken, async (req, res) => {
-    try {
-        const pedidos = await db.all(`SELECT * FROM pedidos ORDER BY id DESC`);
+// ========================================
+// 5. INICIALIZAÇÃO DO SERVIDOR
+// ========================================
+const startServer = async () => {
+  try {
+    // Conectar ao banco
+    await initializeDatabase();
 
-        for (let pedido of pedidos) {
-            const itens = await db.all(`SELECT * FROM itens_pedido WHERE pedido_id = ?`, [pedido.id]);
-            pedido.itens = itens.map(item => ({
-                produto: item.produto,
-                base: item.base,
-                complementos: item.complementos !== 'Nenhum' ? item.complementos.split(', ') : [],
-                valor: item.valor
-            }));
-        }
+    // Iniciar servidor
+    app.listen(config.port, () => {
+      logger.info(`🚀 Servidor rodando em http://localhost:${config.port}`);
+      logger.info(`📚 Documentação: http://localhost:${config.port}/api/docs`);
+    });
+  } catch (error) {
+    logger.error('Erro ao iniciar servidor', { erro: error.message });
+    process.exit(1);
+  }
+};
 
-        return res.json(pedidos);
-    } catch (error) {
-        console.error('Erro ao buscar pedidos:', error);
-        return res.status(500).json({ erro: 'Erro ao carregar pedidos' });
-    }
-});
+// ========================================
+// 6. TRATAMENTO DE SINAIS (GRACEFUL SHUTDOWN)
+// ========================================
+const gracefulShutdown = async signal => {
+  logger.warn(`Recebido sinal ${signal}. Encerrando gracefully...`);
 
-// Atualizar status do pedido
-app.patch('/api/pedidos/:id/status', autenticarToken, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
+  try {
+    await closeDatabase();
+    logger.info('Banco de dados fechado');
 
-        await db.run(`UPDATE pedidos SET status = ? WHERE id = ?`, [status, id]);
-        console.log(`🔄 Status do Pedido #${id} alterado para: ${status}`);
-        return res.json({ mensagem: 'Status atualizado com sucesso!' });
-    } catch (error) {
-        console.error('Erro ao atualizar status:', error);
-        return res.status(500).json({ erro: 'Erro ao atualizar status do pedido' });
-    }
-});
+    process.exit(0);
+  } catch (error) {
+    logger.error('Erro ao encerrar', { erro: error.message });
+    process.exit(1);
+  }
+};
 
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Iniciar!
+startServer();
