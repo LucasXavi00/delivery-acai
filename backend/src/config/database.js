@@ -47,6 +47,7 @@ const createTables = async () => {
         cliente TEXT NOT NULL,
         endereco TEXT NOT NULL,
         pagamento TEXT NOT NULL,
+        itens TEXT,
         total REAL NOT NULL,
         status TEXT DEFAULT 'pendente',
         criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -62,6 +63,14 @@ const createTables = async () => {
         FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE
       );
     `);
+
+    const columns = await db.all('PRAGMA table_info(pedidos)');
+    const hasItensColumn = columns.some(column => column.name === 'itens');
+
+    if (!hasItensColumn) {
+      await db.run('ALTER TABLE pedidos ADD COLUMN itens TEXT');
+      logger.warn('Coluna itens adicionada à tabela pedidos para compatibilidade');
+    }
 
     logger.info('Tabelas do banco de dados criadas/verificadas');
   } catch (error) {

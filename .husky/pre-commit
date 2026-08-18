@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 echo "🔍 Checando código com ESLint e Prettier..."
 npm run lint:fix
 npm run format:fix

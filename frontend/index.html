@@ -185,6 +185,35 @@
         overflow-y: auto;
         color: #fff;
       }
+      .status-badge {
+        background: #ffd700;
+        color: #160a22;
+        font-weight: bold;
+        border-radius: 999px;
+        padding: 6px 10px;
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 0.8rem;
+      }
+      .resumo-pedido {
+        background: #28163c;
+        border: 1px solid #3c2258;
+        border-radius: 10px;
+        padding: 12px;
+        margin: 14px 0;
+      }
+      .resumo-pedido p {
+        color: #d8c9eb;
+        margin: 6px 0;
+      }
+      .acao-dupla {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .acao-dupla button {
+        flex: 1;
+      }
       .modal-header {
         display: flex;
         justify-content: space-between;
@@ -414,10 +443,52 @@
       </div>
     </div>
 
+    <div class="modal" id="modal-confirmacao-pedido">
+      <div class="modal-conteudo">
+        <div class="modal-header">
+          <h3>Confirmar pedido</h3>
+          <button class="btn-fechar" onclick="fecharConfirmacaoPedido()">&times;</button>
+        </div>
+
+        <div class="status-badge">Status: Pendente</div>
+
+        <div class="resumo-pedido">
+          <p><strong>Cliente:</strong> <span id="confirmacao-cliente"></span></p>
+          <p><strong>Endereço:</strong> <span id="confirmacao-endereco"></span></p>
+          <p><strong>Pagamento:</strong> <span id="confirmacao-pagamento"></span></p>
+          <p><strong>Itens:</strong></p>
+          <div id="confirmacao-itens"></div>
+        </div>
+
+        <div class="total-pedido" style="text-align: right; margin-bottom: 14px; color: #00e676">
+          Total: <span id="confirmacao-total"></span>
+        </div>
+
+        <div class="acao-dupla">
+          <button
+            class="btn-fechar"
+            style="
+              background: #28163c;
+              color: #fff;
+              border: 1px solid #3c2258;
+              border-radius: 8px;
+              padding: 12px;
+              cursor: pointer;
+            "
+            onclick="fecharConfirmacaoPedido()"
+          >
+            Voltar
+          </button>
+          <button class="btn-adicionar" onclick="confirmarPedidoFinal()">Confirmar pedido</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       let carrinho = [];
       let itemEmEdicao = null;
-      const NUMERO_WHATSAPP = '5521999998888';
+      let pedidoEmConfirmacao = null;
+      const NUMERO_WHATSAPP = '5521972692093';
 
       function abrirModal(tamanho, preco) {
         itemEmEdicao = {
@@ -486,7 +557,7 @@
         document.getElementById('btn-ver-carrinho').innerText = `Ver Carrinho (${carrinho.length})`;
       }
 
-      async function finalizarPedido() {
+      function finalizarPedido() {
         if (carrinho.length === 0) {
           alert('Seu carrinho está vazio! Escolha um açaí primeiro.');
           return;
@@ -503,7 +574,7 @@
 
         const total = carrinho.reduce((acc, item) => acc + item.preco, 0);
 
-        const dadosPedido = {
+        pedidoEmConfirmacao = {
           cliente: nome,
           endereco: endereco,
           pagamento: pagamento,
@@ -516,23 +587,63 @@
           }))
         };
 
+        document.getElementById('confirmacao-cliente').innerText = nome;
+        document.getElementById('confirmacao-endereco').innerText = endereco;
+        document.getElementById('confirmacao-pagamento').innerText = pagamento;
+        document.getElementById('confirmacao-total').innerText =
+          `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+        const itensContainer = document.getElementById('confirmacao-itens');
+        itensContainer.innerHTML = pedidoEmConfirmacao.itens
+          .map(
+            item =>
+              `<p>• ${item.produto} (${item.base}) — ${item.complementos.join(', ') || 'Sem complementos'}</p>`
+          )
+          .join('');
+
+        document.getElementById('modal-confirmacao-pedido').style.display = 'flex';
+      }
+
+      function fecharConfirmacaoPedido() {
+        document.getElementById('modal-confirmacao-pedido').style.display = 'none';
+      }
+
+      async function confirmarPedidoFinal() {
+        if (!pedidoEmConfirmacao) return;
+
         try {
-          await fetch('http://localhost:3000/api/pedidos', {
+          const resposta = await fetch('http://localhost:5000/api/pedidos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dadosPedido)
+            body: JSON.stringify(pedidoEmConfirmacao)
           });
 
-          let textoItens = '';
-          carrinho.forEach((c, idx) => {
-            textoItens += `\n*${idx + 1}. Açaí ${c.tamanho} (${c.base})*\n- Cobertura: ${c.cobertura}\n- Acomp: ${c.acompanhamentos.join(', ') || 'Nenhum'}\n`;
-          });
+          const dados = await resposta.json();
 
-          const msg = `🍇 *NOVO PEDIDO - AÇAÍZADA*\n${textoItens}\n*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n👤 *Cliente:* ${nome}\n📍 *Endereço:* ${endereco}\n💳 *Pagamento:* ${pagamento}`;
+          if (!resposta.ok) {
+            throw new Error(dados.erro || 'Erro ao salvar pedido.');
+          }
 
-          window.open(`https://wa.me/${5521972692093}?text=${encodeURIComponent(msg)}`, '_blank');
+          const msg = `🍇 *NOVO PEDIDO - AÇAÍZADA*\n${pedidoEmConfirmacao.itens
+            .map(
+              (item, idx) =>
+                `\n*${idx + 1}. ${item.produto} (${item.base})*\n- ${item.complementos.join('\n- ') || 'Sem complementos'}`
+            )
+            .join(
+              ''
+            )}\n\n*Total:* R$ ${pedidoEmConfirmacao.total.toFixed(2).replace('.', ',')}\n\n👤 *Cliente:* ${pedidoEmConfirmacao.cliente}\n📍 *Endereço:* ${pedidoEmConfirmacao.endereco}\n💳 *Pagamento:* ${pedidoEmConfirmacao.pagamento}\n📦 *Status:* Pendente`;
+
+          fecharConfirmacaoPedido();
+          carrinho = [];
+          atualizarCarrinhoBarra();
+          document.getElementById('cliente-nome').value = '';
+          document.getElementById('cliente-endereco').value = '';
+
+          alert('Pedido confirmado com sucesso! Agora o pedido foi enviado para a cozinha.');
+          window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
         } catch (err) {
-          alert('Erro ao processar pedido no servidor.');
+          console.error('Erro ao processar pedido no servidor:', err);
+          alert(err.message || 'Erro ao processar pedido no servidor.');
         }
       }
     </script>

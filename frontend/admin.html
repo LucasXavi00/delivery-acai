@@ -55,6 +55,20 @@
         background: #cc0000;
       }
 
+      .btn-reset {
+        background: #ff9f1c;
+        color: #1d1d1d;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn-reset:hover {
+        background: #f58d00;
+      }
+
       .grid-pedidos {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -154,6 +168,7 @@
       <h1>AÇAIZADA 🍇 - Painel da Cozinha</h1>
       <div class="header-acoes">
         <span id="hora-atualizacao">Atualizando...</span>
+        <button class="btn-reset" onclick="resetarPedidos()">Resetar pedidos ♻️</button>
         <button class="btn-sair" onclick="Sair()">Sair 🚪</button>
       </div>
     </header>
@@ -175,9 +190,43 @@
         window.location.href = 'login.html';
       }
 
+      async function resetarPedidos() {
+        const confirmar = window.confirm(
+          'Deseja limpar todos os pedidos da cozinha? Esta ação não pode ser desfeita.'
+        );
+
+        if (!confirmar) {
+          return;
+        }
+
+        try {
+          const resposta = await fetch('http://localhost:5000/api/pedidos/reset', {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          const dados = await resposta.json();
+
+          if (!resposta.ok) {
+            throw new Error(dados.erro || dados.mensagem || 'Erro ao resetar pedidos');
+          }
+
+          document.getElementById('container-pedidos').innerHTML =
+            '<p style="color: #b3a2ba;">Nenhum pedido recebido ainda.</p>';
+          document.getElementById('hora-atualizacao').innerText =
+            'Última atualização: ' + new Date().toLocaleTimeString();
+
+          alert(dados.mensagem || 'Pedidos resetados com sucesso!');
+          carregarPedidos();
+        } catch (error) {
+          console.error('Erro ao resetar pedidos:', error);
+          alert(error.message || 'Erro ao resetar pedidos.');
+        }
+      }
+
       async function carregarPedidos() {
         try {
-          const resposta = await fetch('http://localhost:3000/api/pedidos', {
+          const resposta = await fetch('http://localhost:5000/api/pedidos', {
             headers: { Authorization: `Bearer ${token}` }
           });
 
@@ -186,13 +235,14 @@
             return;
           }
 
-          const pedidos = await resposta.json();
+          const payload = await resposta.json();
+          const pedidos = Array.isArray(payload) ? payload : payload.dados || [];
 
           const container = document.getElementById('container-pedidos');
           document.getElementById('hora-atualizacao').innerText =
             'Última atualização: ' + new Date().toLocaleTimeString();
 
-          if (pedidos.length === 0) {
+          if (!Array.isArray(pedidos) || pedidos.length === 0) {
             container.innerHTML = '<p style="color: #b3a2ba;">Nenhum pedido recebido ainda.</p>';
             return;
           }
@@ -200,18 +250,26 @@
           container.innerHTML = '';
 
           pedidos.forEach(pedido => {
+            let itens = [];
+            try {
+              itens = Array.isArray(pedido.itens) ? pedido.itens : JSON.parse(pedido.itens || '[]');
+            } catch {
+              itens = [];
+            }
+
             let itensHtml = '';
-            pedido.itens.forEach(item => {
-              const complementosText =
-                item.complementos.length > 0 ? item.complementos.join(', ') : 'Nenhum';
+            itens.forEach(item => {
+              const complementos = Array.isArray(item.complementos) ? item.complementos : [];
+              const complementosText = complementos.length > 0 ? complementos.join(', ') : 'Nenhum';
               itensHtml += `
                             <div class="item-detalhe">
-                                <div class="item-nome">${item.produto} (${item.base})</div>
+                                <div class="item-nome">${item.produto || 'Açaí'} (${item.base || '-'})</div>
                                 <div class="item-sub">Complementos: ${complementosText}</div>
                             </div>
                         `;
             });
 
+            const total = Number(pedido.total || 0);
             const card = `
                         <div class="card-pedido">
                             <div>
@@ -228,7 +286,7 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="total-pedido">Total: R$ ${pedido.total.toFixed(2).replace('.', ',')}</div>
+                                <div class="total-pedido">Total: R$ ${total.toFixed(2).replace('.', ',')}</div>
                                 <div class="controle-status">
                                     <label for="status-${pedido.id}">Status do Pedido:</label>
                                     <select id="status-${pedido.id}" onchange="atualizarStatus(${pedido.id}, this.value)">
@@ -250,7 +308,7 @@
 
       async function atualizarStatus(id, novoStatus) {
         try {
-          await fetch(`http://localhost:3000/api/pedidos/${id}/status`, {
+          await fetch(`http://localhost:5000/api/pedidos/${id}/status`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',

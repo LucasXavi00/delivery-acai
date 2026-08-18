@@ -153,3 +153,23 @@ export const deletarPedido = async (req, res, next) => {
     next(error);
   }
 };
+
+export const resetarPedidos = async (req, res, next) => {
+  try {
+    const db = getDatabase();
+
+    await db.run('DELETE FROM pedidos');
+    await db.run('DELETE FROM sqlite_sequence WHERE name = "pedidos"');
+
+    logger.warn('Todos os pedidos foram resetados', {
+      usuario: req.user?.role || 'admin'
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      sucesso: true,
+      mensagem: 'Todos os pedidos foram resetados com sucesso.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

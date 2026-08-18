@@ -156,7 +156,7 @@
         erroDiv.style.display = 'none';
 
         try {
-          const resposta = await fetch('http://localhost:3000/api/auth/login', {
+          const resposta = await fetch('http://localhost:5000/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ senha })

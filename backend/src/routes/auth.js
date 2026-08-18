@@ -10,12 +10,15 @@ import { config } from '../config/app.config.js';
 
 const router = express.Router();
 
-// Rate limiter para login (5 tentativas a cada 15 minutos)
-const loginLimiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxAttempts,
-  message: { erro: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }
-});
+// Rate limiter para login em desenvolvimento
+// Em dev, é mais útil manter o login liberado para testes e ajustes.
+const loginLimiter = config.isDevelopment
+  ? (req, res, next) => next()
+  : rateLimit({
+      windowMs: config.rateLimit.windowMs,
+      max: config.rateLimit.maxAttempts,
+      message: { erro: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }
+    });
 
 /**
  * POST /api/auth/login

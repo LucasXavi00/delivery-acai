@@ -1,12 +1,13 @@
 -- Criação da tabela de pedidos da Açaizada
 CREATE TABLE IF NOT EXISTS pedidos (
-    id SERIAL PRIMARY KEY,
-    cliente VARCHAR(100) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente TEXT NOT NULL,
     endereco TEXT NOT NULL,
-    forma_pagamento VARCHAR(50) NOT NULL,
-    total DECIMAL(10, 2) NOT NULL,
-    status VARCHAR(30) DEFAULT 'pendente',
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    pagamento TEXT NOT NULL,
+    itens TEXT,
+    total REAL NOT NULL,
+    status TEXT DEFAULT 'pendente',
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabela para guardar os itens e complementos de cada pedido

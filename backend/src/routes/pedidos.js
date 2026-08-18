@@ -8,7 +8,8 @@ import {
   listarPedidos,
   obterPedido,
   atualizarStatusPedido,
-  deletarPedido
+  deletarPedido,
+  resetarPedidos
 } from '../controllers/pedidosController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/auth.js';
 import { sanitizeInput, validateRequired } from '../middleware/validation.js';
@@ -29,6 +30,13 @@ router.post('/', sanitizeInput, validateRequired(['cliente', 'itens', 'total']),
  * Response: { sucesso: true, dados: array, total: number }
  */
 router.get('/', authMiddleware, adminMiddleware, listarPedidos);
+
+/**
+ * DELETE /api/pedidos/reset
+ * Resetar todos os pedidos (admin only)
+ * Response: { sucesso: true, mensagem: string }
+ */
+router.delete('/reset', authMiddleware, adminMiddleware, resetarPedidos);
 
 /**
  * GET /api/pedidos/:id

@@ -34,16 +34,16 @@ const formatMessage = (level, message, meta = {}) => {
 
 const getColor = level => {
   switch (level) {
-  case LOG_LEVELS.ERROR:
-    return COLORS.red;
-  case LOG_LEVELS.WARN:
-    return COLORS.yellow;
-  case LOG_LEVELS.INFO:
-    return COLORS.green;
-  case LOG_LEVELS.DEBUG:
-    return COLORS.blue;
-  default:
-    return COLORS.reset;
+    case LOG_LEVELS.ERROR:
+      return COLORS.red;
+    case LOG_LEVELS.WARN:
+      return COLORS.yellow;
+    case LOG_LEVELS.INFO:
+      return COLORS.green;
+    case LOG_LEVELS.DEBUG:
+      return COLORS.blue;
+    default:
+      return COLORS.reset;
   }
 };
 
