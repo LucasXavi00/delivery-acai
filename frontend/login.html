@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Açaizada - Login Cozinha</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #120216; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card-login { background: #1e0427; border: 1px solid #3d0c4e; border-radius: 12px; padding: 28px; width: 100%; max-width: 360px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; }
+        h2 { color: #ffd700; margin-bottom: 20px; font-size: 1.4rem; }
+        
+        .input-grupo { position: relative; margin-bottom: 16px; display: flex; align-items: center; }
+        input { width: 100%; padding: 12px 42px 12px 12px; border: 1px solid #3d0c4e; background: #2a0835; color: white; border-radius: 8px; font-size: 1rem; text-align: center; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #a832bc; }
+        
+        /* Botão com SVG transparente e sutil */
+        .btn-olho { position: absolute; right: 12px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: opacity 0.2s; }
+        .btn-olho:hover { opacity: 0.9; }
+        .btn-olho svg { width: 20px; height: 20px; stroke: #ffffff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+        
+        button.btn-entrar { width: 100%; background: #25d366; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        button.btn-entrar:hover { background: #1ebd5a; }
+        
+        .erro { color: #ff4d4d; font-size: 0.85rem; margin-top: 12px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="card-login">
+        <h2>Painel da Cozinha 🍇</h2>
+        <div class="input-grupo">
+            <input type="password" id="senha" placeholder="Digite a senha">
+            <button type="button" class="btn-olho" onclick="alternarSenha()" title="Mostrar/Ocultar senha">
+                <svg id="icone-olho" viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+        <button class="btn-entrar" onclick="fazerLogin()">Entrar</button>
+        <div class="erro" id="msg-erro">Senha incorreta!</div>
+    </div>
+
+    <script>
+        function alternarSenha() {
+            const inputSenha = document.getElementById('senha');
+            const iconeOlho = document.getElementById('icone-olho');
+
+            if (inputSenha.type === 'password') {
+                inputSenha.type = 'text';
+                iconeOlho.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                inputSenha.type = 'password';
+                iconeOlho.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        }
+
+        async function fazerLogin() {
+            const senha = document.getElementById('senha').value;
+            const erroDiv = document.getElementById('msg-erro');
+            erroDiv.style.display = 'none';
+
+            try {
+                const resposta = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ senha })
+                });
+
+                const dados = await resposta.json();
+
+                if (resposta.ok) {
+                    localStorage.setItem('token_acai', dados.token);
+                    window.location.href = 'admin.html';
+                } else {
+                    erroDiv.innerText = dados.erro || 'Erro ao fazer login';
+                    erroDiv.style.display = 'block';
+                }
+            } catch (error) {
+                erroDiv.innerText = 'Erro ao conectar com o servidor';
+                erroDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

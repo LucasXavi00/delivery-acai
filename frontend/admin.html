@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Açaizada - Painel da Cozinha</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #120216; color: #fff; padding: 20px; }
+
+        header { display: flex; justify-content: space-between; align-items: center; background: #2a0835; padding: 16px 24px; border-radius: 12px; border-bottom: 2px solid #a832bc; margin-bottom: 24px; }
+        header h1 { font-size: 1.5rem; color: #ffd700; }
+        .header-acoes { display: flex; align-items: center; gap: 16px; }
+        .header-acoes span { font-size: 0.85rem; color: #d896ea; }
+        
+        .btn-sair { background: #ff4d4d; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-sair:hover { background: #cc0000; }
+
+        .grid-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+
+        .card-pedido { background: #1e0427; border: 1px solid #3d0c4e; border-radius: 12px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: space-between; }
+        .pedido-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3d0c4e; padding-bottom: 8px; margin-bottom: 12px; }
+        .pedido-header h3 { font-size: 1.1rem; color: #fff; }
+
+        .info-cliente { margin-bottom: 12px; font-size: 0.85rem; color: #b3a2ba; }
+        .info-cliente strong { color: #fff; }
+
+        .lista-itens { margin-bottom: 12px; background: #2a0835; padding: 10px; border-radius: 8px; }
+        .item-detalhe { margin-bottom: 8px; border-bottom: 1px solid #3d0c4e; padding-bottom: 6px; }
+        .item-detalhe:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .item-nome { font-weight: bold; color: #d896ea; font-size: 0.9rem; }
+        .item-sub { font-size: 0.8rem; color: #ccc; }
+
+        .total-pedido { font-size: 1.1rem; font-weight: bold; color: #25d366; text-align: right; margin-bottom: 12px; }
+
+        .controle-status { display: flex; flex-direction: column; gap: 6px; }
+        .controle-status label { font-size: 0.8rem; color: #d896ea; font-weight: bold; }
+        .controle-status select { background: #2a0835; color: #fff; border: 1px solid #3d0c4e; padding: 8px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AÇAIZADA 🍇 - Painel da Cozinha</h1>
+        <div class="header-acoes">
+            <span id="hora-atualizacao">Atualizando...</span>
+            <button class="btn-sair" onclick="Sair()">Sair 🚪</button>
+        </div>
+    </header>
+
+    <div class="grid-pedidos" id="container-pedidos">
+        <p style="color: #b3a2ba;">Carregando pedidos...</p>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token_acai');
+
+        // Se não houver token, redireciona para a tela de login
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        function Sair() {
+            localStorage.removeItem('token_acai');
+            window.location.href = 'login.html';
+        }
+
+        async function carregarPedidos() {
+            try {
+                const resposta = await fetch('http://localhost:3000/api/pedidos', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (resposta.status === 401 || resposta.status === 403) {
+                    Sair();
+                    return;
+                }
+
+                const pedidos = await resposta.json();
+
+                const container = document.getElementById('container-pedidos');
+                document.getElementById('hora-atualizacao').innerText = 'Última atualização: ' + new Date().toLocaleTimeString();
+
+                if (pedidos.length === 0) {
+                    container.innerHTML = '<p style="color: #b3a2ba;">Nenhum pedido recebido ainda.</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+
+                pedidos.forEach(pedido => {
+                    let itensHtml = '';
+                    pedido.itens.forEach(item => {
+                        const complementosText = item.complementos.length > 0 ? item.complementos.join(', ') : 'Nenhum';
+                        itensHtml += `
+                            <div class="item-detalhe">
+                                <div class="item-nome">${item.produto} (${item.base})</div>
+                                <div class="item-sub">Complementos: ${complementosText}</div>
+                            </div>
+                        `;
+                    });
+
+                    const card = `
+                        <div class="card-pedido">
+                            <div>
+                                <div class="pedido-header">
+                                    <h3>Pedido #${pedido.id}</h3>
+                                </div>
+                                <div class="info-cliente">
+                                    <p><strong>Cliente:</strong> ${pedido.cliente}</p>
+                                    <p><strong>Endereço:</strong> ${pedido.endereco}</p>
+                                    <p><strong>Pagamento:</strong> ${pedido.pagamento}</p>
+                                </div>
+                                <div class="lista-itens">
+                                    ${itensHtml}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="total-pedido">Total: R$ ${pedido.total.toFixed(2).replace('.', ',')}</div>
+                                <div class="controle-status">
+                                    <label for="status-${pedido.id}">Status do Pedido:</label>
+                                    <select id="status-${pedido.id}" onchange="atualizarStatus(${pedido.id}, this.value)">
+                                        <option value="pendente" ${pedido.status === 'pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                                        <option value="em_preparo" ${pedido.status === 'em_preparo' ? 'selected' : ''}>👨‍🍳 Em Preparo</option>
+                                        <option value="saiu_entrega" ${pedido.status === 'saiu_entrega' ? 'selected' : ''}>🛵 Saiu para Entrega</option>
+                                        <option value="entregue" ${pedido.status === 'entregue' ? 'selected' : ''}>✅ Entregue</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } catch (error) {
+                console.error('Erro ao buscar pedidos:', error);
+            }
+        }
+
+        async function atualizarStatus(id, novoStatus) {
+            try {
+                await fetch(`http://localhost:3000/api/pedidos/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: novoStatus })
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar status do pedido:', error);
+            }
+        }
+
+        carregarPedidos();
+        setInterval(carregarPedidos, 5000);
+    </script>
+</body>
+</html>
