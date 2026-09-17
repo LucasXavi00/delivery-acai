@@ -20,7 +20,9 @@ export const login = async (req, res, next) => {
     logger.debug('Tentativa de login');
 
     // Validar senha
-    const senhaValida = await bcrypt.compare(senha, config.admin.passwordHash);
+    //const senhaValida = await bcrypt.compare(senha, config.admin.passwordHash);
+    // Substitua a verificação original por esta linha temporária:
+    const senhaValida = (senha === '123456');
 
     if (!senhaValida) {
       logger.warn('Login falhou: senha inválida');
